@@ -1,0 +1,226 @@
+<div class="row align-items-top">
+    <div class="col-auto align-items-left" style="margin-left: 20px; width: 450px">
+        <div class="row" style="margin-bottom: 15px;">
+            <h1 style="color: #7868e6">Cryptocurrency</h1>
+        </div>
+        <div class="row" style="margin: 5px; margin-left: 5px">
+            {% if asset_icon_url %}
+                <img src="{{asset_icon_url}}" alt="..." style="height: 80px; width: 100px;" />
+            {% endif %}
+        </div>
+        <div class="row" style="margin: 5px; margin-left: 5px">
+            <h4>{{asset.name}}</h4>
+        </div>
+        <form class="row g-3 align-items-center" style="margin: 5px; margin-left: 5px">
+            <div class="col-auto" style="margin-left: 5px; width 61">
+                <a><strong>Coin ID:</strong></a>
+            </div>
+            <div class="col-auto">
+                <script>
+                    let exchange_val = `{{ exchange_id|safe }}`;
+                    function inputBaseAssetDataList() {
+                        var input_val = document.getElementById("baseAssetDataList").value;
+                        var dropdown_val =
+                            document.getElementById("baseAssetDataListOptions").childNodes;
+                        for (var i = 0; i < dropdown_val.length; i++) {
+                            if (dropdown_val[i].value === input_val) {
+                                window.location.replace(`/crypto/${input_val}/${exchange_val}`);
+                                break;
+                            }
+                        }
+                    }
+                </script>
+                <input
+                    type="text"
+                    list="baseAssetDataListOptions"
+                    id="baseAssetDataList"
+                    oninput="inputBaseAssetDataList()"
+                    value="{{asset.asset_id}}"
+                    onkeypress="return event.keyCode!=13"
+                />
+                <datalist id="baseAssetDataListOptions">
+                    {% for base_asset_id in asset_list %}
+                    <option value="{{base_asset_id}}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+        </form>
+        <div class="row"><div height="40px"></div></div>
+        <div class="row" style="margin: 5px; margin-left: 1px">
+            <h3 style="color: #7868e6">Exchange</h3>
+        </div>
+        <div class="row" style="margin: 5px; margin-left: 5px">
+            {% if exchange_icon_url %}
+                <img src="{{exchange_icon_url}}" alt="..." style="height: 80px; width: 100px;" />
+            {% endif %}
+        </div>
+        <div class="row" style="margin: 5px; margin-left: 5px">
+            <h4 font-size="6px">{{exchange.name}}</h4>
+        </div>
+        <form class="row g-3 align-items-center" style="margin: 5px; margin-left: 5px">
+            <div class="col-auto" style="margin-left: 5px" width="110">
+                <a><strong>Exchange ID:</strong></a>
+            </div>
+            <div class="col-auto align-items-left">
+                <script>
+                    let asset_val = `{{ asset_id|safe }}`;
+                    function inputExchangeDataList() {
+                        var input_val = document.getElementById("exchangeDataList").value;
+                        var dropdown_val =
+                            document.getElementById("exchangeDataListOptions").childNodes;
+                        for (var i = 0; i < dropdown_val.length; i++) {
+                            if (dropdown_val[i].value === input_val) {
+                                window.location.replace(`/crypto/${asset_val}/${input_val}`);
+                                break;
+                            }
+                        }
+                    }
+                </script>
+                <input
+                    class="form-control"
+                    list="exchangeDataListOptions"
+                    id="exchangeDataList"
+                    oninput="inputExchangeDataList()"
+                    value="{{exchange.exchange_id}}"
+                    onkeypress="return event.keyCode!=13"
+                />
+                <datalist id="exchangeDataListOptions">
+                    {% for item_exchange_id in exchange_list %}
+                    <option value="{{item_exchange_id}}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+        </form>
+        <div class="row" style="margin: 10px"><div height="40px"></div></div>
+    </div>
+    <div class="col col-auto align-items-left" style="margin-left: 20px; margin-top 10px">
+        <div style="display: flex; flex-direction: column">
+            <h3 style="color: #7868e6; margin: 5px; margin-top: 10px">Exchange Rates Against US Dollar Chart</h3>
+            <script>
+                $(document).ready(function () {
+                    var ctx = document.getElementById("exchangeRateChart");
+                    const exchangeRateChart = new Chart(ctx, {
+                        type: "line",
+                        data: {
+                            labels: {{ er_time_periods|safe }},
+                            datasets: [{
+                                label: "Price in USD ($)",
+                                backgroundColor: "rgb(120, 104, 230)",
+                                borderColor: "rgb(120, 104, 230)",
+                                data: {{ er_prices|safe }},
+                                fill: {
+                                    target: 'origin',
+                                    above: 'rgb(243, 241, 245)',
+                                    below: 'rgb(0, 0, 255)'
+                                }
+                            }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                        },
+                    });
+                });
+            </script>
+            <div class="chart-container" style="position: relative; height: 280px; width:360px; margin-left: 20px">
+                <canvas id="exchangeRateChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row align-items-top">
+    <div class="col" style="margin: 20px">
+        <div class="row" style="margin-top: 5px; margin-left: 1px">
+            <h3 style="color: #7868e6">Coin Details</h3>
+        </div>
+        <div class="row" style="margin: 10px">
+            <div class="list-group list-group-flush">
+                {% if symbol.price %}
+                <p class="list-group-item"><strong>Asset Price:</strong> ${{symbol.price}}</p>
+                {% elif asset.price_usd %}
+                <p class="list-group-item"><strong>Asset Price:</strong> ${{asset.price_usd}}</p>
+                {% endif %}
+                {% if symbol.volume_1hrs_usd %}
+                    <p class="list-group-item">
+                        <strong>Volume Traded in past 1 hour:</strong> ${{symbol.volume_1hrs_usd}}
+                    </p>
+                {% elif asset.volume_1hrs_usd %}
+                    <p class="list-group-item">
+                        <strong>Volume Traded in past 1 hour:</strong> ${{asset.volume_1hrs_usd}}
+                    </p>
+                {% endif %}
+                {% if symbol.volume_1day_usd %}
+                    <p class="list-group-item">
+                        <strong>Volume Traded in past 1 day:</strong> ${{symbol.volume_1day_usd}}
+                    </p>
+                {% elif asset.volume_1day_usd %}
+                    <p class="list-group-item">
+                        <strong>Volume Traded in past 1 day:</strong> ${{asset.volume_1day_usd}}
+                    </p>
+                {% endif %}
+                {% if symbol.volume_1mth_usd %}
+                    <p class="list-group-item">
+                        <strong>Volume Traded in past 1 month:</strong> ${{symbol.volume_1mth_usd}}
+                    </p>
+                {% elif asset.volume_1mth_usd %}
+                    <p class="list-group-item">
+                        <strong>Volume Traded in past 1 month:</strong> ${{asset.volume_1mth_usd}}
+                    </p>
+                {% endif %}                
+                <form class="row g-3 align-items-center" style="margin: 10px">
+                    <div class="col-auto">
+                        <a><strong>Current {{asset.asset_id}}/</strong></a>
+                    </div>
+                    <div class="col-auto">
+                        <script>
+                            er_arr = {{ exchange_rates|safe }}
+                            function getExchangeRate(id) {
+                                for (let i = 0; i < er_arr.length; i++) {
+                                    if (er_arr[i].asset_id_quote == id){
+                                        document.getElementById("exchange-rate-text").innerHTML = er_arr[i].rate;
+                                        break;
+                                    }
+                                }
+                                document.getElementById("exchange-rate-text").innerHTML = input_val;
+                            }
+                            function inputQuoteAssetDataList() {
+                                var input_val = document.getElementById("quoteAssetDataList").value;
+                                var dropdown_val =
+                                    document.getElementById("quoteAssetDataListOptions").childNodes;
+                                for (var i = 0; i < dropdown_val.length; i++) {
+                                    if (dropdown_val[i].value === input_val) {
+                                        getExchangeRate(input_val);
+                                        break;
+                                    }
+                                }
+                            }
+                        </script>
+                        <input
+                            class="form-control"
+                            type="text"
+                            list="quoteAssetDataListOptions"
+                            oninput="inputQuoteAssetDataList()"
+                            id="quoteAssetDataList"
+                            placeholder="Type to search..."
+                            size="20"
+                            maxlength="20"
+                            onkeypress="return event.keyCode!=13"
+                        />
+                        <datalist id="quoteAssetDataListOptions">
+                            {% for quote_asset_name in er_quote_asset_list %}
+                            <option value="{{quote_asset_name}}"></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="col-auto">
+                        <a><strong>Exchange Rate :</strong> </a>
+                    </div>
+                    <div class="col-auto">
+                        <a id="exchange-rate-text"></a>
+                    </div>
+                </form>
+                <div class="container"><div height="40px"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
